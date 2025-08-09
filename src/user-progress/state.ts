@@ -19,7 +19,7 @@ export const useUserProgress = create<ProgressState>((set, get) => ({
   streakDays: 0,
   async ensureLoaded() {
     const user = useAuth.getState().user;
-    if (!user) return;
+    if (!user || !db) return;
     const ref = doc(db, 'progress', user.uid);
     const snap = await getDoc(ref);
     if (snap.exists()) {
@@ -33,7 +33,7 @@ export const useUserProgress = create<ProgressState>((set, get) => ({
   },
   async addLearned(count = 1) {
     const user = useAuth.getState().user;
-    if (!user) return;
+    if (!user || !db) return;
     const ref = doc(db, 'progress', user.uid);
     await updateDoc(ref, { totalLearned: increment(count), updatedAt: serverTimestamp() });
     set((s) => ({ totalLearned: s.totalLearned + count, streakDays: s.streakDays }));

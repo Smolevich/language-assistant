@@ -3,7 +3,7 @@ import { useMemo, useRef } from 'react';
 type Props = {
   word: string;
   transcription: string;
-  audio: string;
+  audio?: string;
 };
 
 export function Card({ word, transcription, audio }: Props) {
@@ -19,12 +19,14 @@ export function Card({ word, transcription, audio }: Props) {
       <div className="text-lg font-semibold">{word}</div>
       <div className="text-gray-500">{transcription}</div>
       <div className="flex items-center gap-2">
-        <button
-          className="px-3 py-1 border rounded hover:bg-gray-50"
-          onClick={() => audioRef.current?.play()}
-        >
-          ▶️ Произношение
-        </button>
+        {audio && (
+          <button
+            className="px-3 py-1 border rounded hover:bg-gray-50"
+            onClick={() => audioRef.current?.play()}
+          >
+            ▶️ Произношение
+          </button>
+        )}
         <button
           className="px-3 py-1 border rounded hover:bg-gray-50"
           onClick={() => {
@@ -34,7 +36,7 @@ export function Card({ word, transcription, audio }: Props) {
         >
           🗣️ TTS
         </button>
-        <audio ref={audioRef} src={audio} preload="none" />
+        {audio && <audio ref={audioRef} src={audio} preload="none" />}
       </div>
     </div>
   );

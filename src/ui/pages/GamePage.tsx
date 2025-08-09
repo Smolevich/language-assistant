@@ -27,11 +27,15 @@ export function GamePage() {
   }, [ensureLoaded]);
 
   async function answer(i: number) {
-    if (i === q.correctIndex) {
+    const isLast = index + 1 === questions.length;
+    const isCorrect = i === q.correctIndex;
+    if (isCorrect) {
       setScore((s) => s + 1);
       await addLearned(1);
     }
-    if (index + 1 < questions.length) setIndex((x) => x + 1);
+    if (!isLast) {
+      setIndex((x) => x + 1);
+    }
   }
 
   return (
@@ -46,7 +50,12 @@ export function GamePage() {
         ))}
       </div>
       {index + 1 === questions.length && (
-        <div className="mt-4 font-medium">Ваш счёт: {score} / {questions.length}</div>
+        <div className="mt-4 space-y-2">
+          <div className="font-medium">Ваш счёт: {score} / {questions.length}</div>
+          <button className="px-3 py-1 border rounded" onClick={() => { setIndex(0); setScore(0); }}>
+            Пройти ещё раз
+          </button>
+        </div>
       )}
     </div>
   );
