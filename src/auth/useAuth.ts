@@ -22,10 +22,16 @@ export const useAuth = create<AuthState>((set) => {
     loading: true,
     async login(providerName) {
       if (!auth || !providers || !(providerName in providers)) {
+        alert('Авторизация недоступна: неверная конфигурация Firebase');
         return;
       }
       const provider = providers[providerName];
-      await signInWithPopup(auth, provider);
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (e: any) {
+        console.error('Sign-in failed', e);
+        alert(`Ошибка входа: ${e?.code || e?.message || 'unknown_error'}`);
+      }
     },
     async logout() {
       if (!auth) return;

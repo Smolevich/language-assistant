@@ -1,9 +1,14 @@
 import { useAuth } from './useAuth';
+import { isFirebaseConfigured, initError } from './firebase';
 
 export function AuthGate() {
   const { user, login, logout, loading } = useAuth();
 
   if (loading) return <div className="text-sm text-gray-500">Загрузка...</div>;
+
+  if (!isFirebaseConfigured) {
+    return <div className="text-xs text-amber-600">Firebase не сконфигурирован</div>;
+  }
 
   if (!user)
     return (
