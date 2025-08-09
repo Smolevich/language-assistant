@@ -1,9 +1,9 @@
 import { Card } from '../widgets/Card';
 
 const sampleWords = [
-  { word: 'mountain', transcription: "['maʊntɪn]", audio: 'https://cdn.jsdelivr.net/gh/mdn/webaudio-examples/voice-change-o-matic/audio/concert-crowd.ogg' },
-  { word: 'river', transcription: "['rɪvə]", audio: 'https://cdn.jsdelivr.net/gh/mdn/webaudio-examples/voice-change-o-matic/audio/concert-crowd.ogg' },
-  { word: 'valley', transcription: "['vælɪ]", audio: 'https://cdn.jsdelivr.net/gh/mdn/webaudio-examples/voice-change-o-matic/audio/concert-crowd.ogg' },
+  { word: 'mountain', transcription: "['maʊntɪn]" },
+  { word: 'river', transcription: "['rɪvə]" },
+  { word: 'valley', transcription: "['vælɪ]" },
 ];
 
 export function HomePage() {
