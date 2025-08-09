@@ -45,6 +45,11 @@ jobs:
         with:
           enablement: enabled
 
+      # Добавим .nojekyll, чтобы исключить обработку Jekyll
+      - name: Add .nojekyll
+        run: |
+          touch dist/.nojekyll
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

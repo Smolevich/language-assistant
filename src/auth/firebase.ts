@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, GithubAuthProvider, FacebookAuthProvider } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getAuth, GoogleAuthProvider, GithubAuthProvider, FacebookAuthProvider, type Auth } from 'firebase/auth';
+import { getFirestore, type Firestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -11,14 +11,38 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-export const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+export const isFirebaseConfigured = Boolean(
+  firebaseConfig.apiKey &&
+  firebaseConfig.authDomain &&
+  firebaseConfig.projectId &&
+  firebaseConfig.storageBucket &&
+  firebaseConfig.messagingSenderId &&
+  firebaseConfig.appId
+);
 
-export const providers = {
-  google: new GoogleAuthProvider(),
-  github: new GithubAuthProvider(),
-  facebook: new FacebookAuthProvider(),
-};
+export let app: ReturnType<typeof initializeApp> | null = null;
+export let auth: Auth | null = null;
+export let db: Firestore | null = null;
+export let initError: Error | null = null;
+
+try {
+  if (isFirebaseConfigured) {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+  } else {
+    throw new Error('Firebase env vars are missing');
+  }
+} catch (e) {
+  initError = e as Error;
+}
+
+export const providers = isFirebaseConfigured
+  ? {
+      google: new GoogleAuthProvider(),
+      github: new GithubAuthProvider(),
+      facebook: new FacebookAuthProvider(),
+    }
+  : ({} as Record<string, never>);
 
 
