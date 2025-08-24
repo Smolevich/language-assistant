@@ -14,7 +14,7 @@ type ProgressState = Progress & {
   addLearned: (count?: number) => Promise<void>;
 };
 
-export const useUserProgress = create<ProgressState>((set, get) => ({
+export const useUserProgress = create<ProgressState>((set) => ({
   totalLearned: 0,
   streakDays: 0,
   async ensureLoaded() {
@@ -39,5 +39,4 @@ export const useUserProgress = create<ProgressState>((set, get) => ({
     set((s) => ({ totalLearned: s.totalLearned + count, streakDays: s.streakDays }));
   },
 }));
-
 
