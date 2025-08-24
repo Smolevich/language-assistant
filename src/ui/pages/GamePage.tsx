@@ -4,15 +4,9 @@ import { useUserProgress } from '../../user-progress/state';
 const questions = [
   {
     id: 1,
-    prompt: 'Столица of France?',
+    prompt: 'Столица Франции?',
     options: ['Berlin', 'Paris', 'Rome', 'Madrid'],
     correctIndex: 1,
-  },
-  {
-    id: 2,
-    prompt: 'Largest ocean?',
-    options: ['Atlantic', 'Indian', 'Pacific', 'Arctic'],
-    correctIndex: 2,
   },
 ];
 
@@ -29,7 +23,6 @@ export function GamePage() {
 
   async function answer(i: number) {
     if (!q) return;
-    const isLast = index + 1 === questions.length;
     const isCorrect = i === q.correctIndex;
     if (isCorrect) {
       setScore((s) => s + 1);
@@ -65,5 +58,4 @@ export function GamePage() {
     </div>
   );
 }
-
 

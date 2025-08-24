@@ -9,6 +9,7 @@ export function RootLayout() {
           <NavLink to="/" className="font-semibold">Language Assistant</NavLink>
           <div className="ml-auto flex items-center gap-3">
             <NavLink to="/game" className={({ isActive }) => isActive ? 'text-blue-600' : ''}>Игра</NavLink>
+            <NavLink to="/dictionary" className={({ isActive }) => isActive ? 'text-blue-600' : ''}>Словарь</NavLink>
             <NavLink to="/profile" className={({ isActive }) => isActive ? 'text-blue-600' : ''}>Профиль</NavLink>
             <AuthGate />
           </div>
@@ -20,5 +21,4 @@ export function RootLayout() {
     </div>
   );
 }
-
 

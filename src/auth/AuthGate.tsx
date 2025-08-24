@@ -1,5 +1,5 @@
 import { useAuth } from './useAuth';
-import { isFirebaseConfigured, initError } from './firebase';
+import { isFirebaseConfigured } from './firebase';
 
 export function AuthGate() {
   const { user, login, logout, loading } = useAuth();
@@ -26,5 +26,4 @@ export function AuthGate() {
     </div>
   );
 }
-
 
