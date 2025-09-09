@@ -1,11 +1,17 @@
-import { WordsLocalRepo } from './local/wordsLocalRepo';
 import type { WordsRepo } from './wordsRepo';
+import { WordsLocalRepo } from './local/wordsLocalRepo';
+import { WordsDuckRepo } from './duckdb/wordsDuckRepo';
 
-// In the next step, we will add a DuckDB-backed repo and select it here when available.
 let wordsRepo: WordsRepo | null = null;
 
+// Prefer DuckDB (WASM) in browser; fallback to localStorage repo if init fails
 export function getWordsRepo(): WordsRepo {
-  if (!wordsRepo) wordsRepo = new WordsLocalRepo();
+  if (!wordsRepo) {
+    try {
+      wordsRepo = new WordsDuckRepo();
+    } catch {
+      wordsRepo = new WordsLocalRepo();
+    }
+  }
   return wordsRepo;
 }
-

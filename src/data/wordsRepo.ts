@@ -6,5 +6,8 @@ export interface WordsRepo {
   remove(id: string): Promise<void>;
   bulkInsert(words: Omit<Word, 'id'>[]): Promise<void>;
   clear(): Promise<void>;
+  // Fast-path bulk import from a JSON text that contains an array of
+  // { term, translation, transcription?, audio?, lang? } records.
+  // Returns number of imported rows.
+  importRawJsonArray?(jsonText: string): Promise<number>;
 }
-

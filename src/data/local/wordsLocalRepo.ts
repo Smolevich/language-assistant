@@ -1,5 +1,6 @@
 import type { WordsRepo } from '../wordsRepo';
 import type { Word } from '../../words/store';
+import { commonEnglishWords } from '../dictionaries/commonWords';
 
 const STORAGE_KEY = 'la_words_v1';
 
@@ -7,13 +8,27 @@ function uid() {
   return Math.random().toString(36).slice(2, 10);
 }
 
+function normalizeRecord(rec: any): Word | null {
+  // normalize legacy shapes e.g., { word, transcription } to { term, translation }
+  if (!rec) return null;
+  const term = rec.term ?? rec.word ?? rec.word?.term ?? null;
+  const translation = rec.translation ?? rec.word?.translation ?? '';
+  if (!term) return null;
+  const transcription = rec.transcription ?? rec.word?.transcription ?? undefined;
+  const audio = rec.audio ?? undefined;
+  const lang = rec.lang ?? 'en';
+  const id = rec.id ?? uid();
+  return { id, term, translation, transcription, audio, lang } as Word;
+}
+
 function load(): Word[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
-    const parsed = JSON.parse(raw) as Word[];
+    const parsed = JSON.parse(raw) as any[];
     if (!Array.isArray(parsed)) return [];
-    return parsed;
+    const norm = parsed.map((r) => normalizeRecord(r)).filter(Boolean) as Word[];
+    return norm;
   } catch {
     return [];
   }
@@ -27,7 +42,12 @@ function save(words: Word[]) {
 
 export class WordsLocalRepo implements WordsRepo {
   async list(): Promise<Word[]> {
-    return load();
+    const words = load();
+    if (words.length === 0) {
+      await this.loadCommonWords();
+      return load();
+    }
+    return words;
   }
   async add(word: Omit<Word, 'id'>): Promise<Word> {
     const w: Word = { id: uid(), ...word };
@@ -48,5 +68,32 @@ export class WordsLocalRepo implements WordsRepo {
   async clear(): Promise<void> {
     save([]);
   }
+  async loadCommonWords(): Promise<void> {
+    const wordsToAdd = commonEnglishWords.map((item) => ({
+      term: item.word,
+      translation: item.translation ?? '',
+      transcription: item.transcription ?? undefined,
+      lang: 'en',
+    }));
+    await this.bulkInsert(wordsToAdd);
+  }
+  async importRawJsonArray(jsonText: string): Promise<number> {
+    try {
+      const arr = JSON.parse(jsonText);
+      if (!Array.isArray(arr)) return 0;
+      const mapped = arr
+        .map((r: any) => ({
+          term: r.term ?? r.word ?? '',
+          translation: r.translation ?? '',
+          transcription: r.transcription ?? undefined,
+          audio: r.audio ?? undefined,
+          lang: r.lang ?? 'en',
+        }))
+        .filter((r: any) => r.term && r.translation);
+      await this.bulkInsert(mapped);
+      return mapped.length;
+    } catch {
+      return 0;
+    }
+  }
 }
-

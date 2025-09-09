@@ -14,6 +14,7 @@ type WordsState = {
   loaded: boolean;
   words: Word[];
   ensureLoaded: () => Promise<void>;
+  reload: () => Promise<void>;
   addWord: (w: Omit<Word, 'id'>) => Promise<void>;
   removeWord: (id: string) => Promise<void>;
   importWords: (ws: Omit<Word, 'id'>[]) => Promise<void>;
@@ -64,6 +65,11 @@ export const useWords = create<WordsState>((set, get) => ({
       await repo.bulkInsert(seed);
       list = await repo.list();
     }
+    set({ words: list, loaded: true });
+  },
+  async reload() {
+    const repo = getWordsRepo();
+    const list = await repo.list();
     set({ words: list, loaded: true });
   },
   async addWord(w) {
