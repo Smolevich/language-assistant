@@ -21,21 +21,38 @@ export const useUserProgress = create<ProgressState>((set) => ({
     const user = useAuth.getState().user;
     if (!user || !db) return;
     const ref = doc(db, 'progress', user.uid);
-    const snap = await getDoc(ref);
-    if (snap.exists()) {
-      const data = snap.data() as Progress;
-      set({ ...data });
-    } else {
-      const initial: Progress = { totalLearned: 0, streakDays: 0 };
-      await setDoc(ref, { ...initial, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
-      set(initial);
+    try {
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        const data = snap.data() as Progress;
+        set({ ...data });
+      } else {
+        const initial: Progress = { totalLearned: 0, streakDays: 0 };
+        await setDoc(ref, { ...initial, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+        set(initial);
+      }
+    } catch (e) {
+      // офлайн/400 — не ломаем UI, оставляем дефолтные значения
+      // eslint-disable-next-line no-console
+      console.warn('ensureLoaded skipped due to Firestore error', e);
+      set((s) => ({ totalLearned: s.totalLearned ?? 0, streakDays: s.streakDays ?? 0 }));
     }
   },
   async addLearned(count = 1) {
     const user = useAuth.getState().user;
     if (!user || !db) return;
     const ref = doc(db, 'progress', user.uid);
-    await updateDoc(ref, { totalLearned: increment(count), updatedAt: serverTimestamp() });
+    try {
+      await updateDoc(ref, { totalLearned: increment(count), updatedAt: serverTimestamp() });
+    } catch {
+      // если документа ещё нет или офлайн — создаём/обновляем через setDoc merge
+      try {
+        await setDoc(ref, { totalLearned: increment(count), updatedAt: serverTimestamp() }, { merge: true } as any);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn('addLearned skipped due to Firestore error', e);
+      }
+    }
     set((s) => ({ totalLearned: s.totalLearned + count, streakDays: s.streakDays }));
   },
 }));

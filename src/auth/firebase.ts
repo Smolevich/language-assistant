@@ -1,6 +1,12 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, GithubAuthProvider, FacebookAuthProvider, type Auth } from 'firebase/auth';
-import { getFirestore, type Firestore } from 'firebase/firestore';
+import {
+  initializeFirestore,
+  type Firestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+  setLogLevel,
+} from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -29,7 +35,20 @@ try {
   if (isFirebaseConfigured) {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
-    db = getFirestore(app);
+    // Авто-детект long-polling чтобы избежать 400 ошибок WebChannel за прокси/фаерволом
+    db = initializeFirestore(app, {
+      // Авто-детект транспортов (long-poll/fetch streams) против 400 Listen в некоторых сетях
+      experimentalAutoDetectLongPolling: true,
+      useFetchStreams: true,
+      ignoreUndefinedProperties: true,
+      // Включаем офлайн-персистентность и очередь записей между перезагрузками
+      localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+    } as any);
+
+    // Включаем подробные логи Firestore по флагу (в консоли браузера)
+    try {
+      if (localStorage.getItem('la_fs_debug') === '1') setLogLevel('debug');
+    } catch {}
   } else {
     throw new Error('Firebase env vars are missing');
   }
@@ -44,5 +63,3 @@ export const providers = isFirebaseConfigured
       facebook: new FacebookAuthProvider(),
     }
   : ({} as Record<string, never>);
-
-
